@@ -19,12 +19,11 @@ function Sauercrowd.Rules.ProhibitAuctionhouseUsage()
 end
 
 function Sauercrowd.Rules:AutoDeclineDuels()
-	if( not SauercrowdOptionsDB.auto_decline_duels ) then
+	if(not SauercrowdOptionsDB.auto_decline_duels) then
 		return
 	end
 
-	StaticPopup_Hide("DUEL_REQUEST")
-	DeclineDuel()
+	CancelDuel()
 end
 
 function Sauercrowd.Rules:ProhibitTradeWithNonGuildMembers()
@@ -175,7 +174,7 @@ function Sauercrowd.Rules:Initialize()
 			Sauercrowd.Rules:ProhibitGroupingWithNonGuildMembers()
 		end, 0, "RaidRosterCheck")
 
-	Sauercrowd.EventManager:RegisterHandler("DUEL_REQUEST",
+	Sauercrowd.EventManager:RegisterHandler("DUEL_REQUESTED",
 		function()
 			Sauercrowd.Rules:AutoDeclineDuels()
 		end, 0, "DuelAutoDecline")
