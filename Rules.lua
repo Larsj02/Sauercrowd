@@ -80,60 +80,7 @@ function Sauercrowd.Rules:ProhibitGroupingWithNonGuildMembers()
 	end
 end
 
-function Sauercrowd.Rules.ProhibitMailboxUsage()
-	C_GuildInfo.GuildRoster()
-	local bankRankIndex = 1 -- Fallback Guildmaster
-
-	for i = 1, GuildControlGetNumRanks() do
-		rankName = GuildControlGetRankName(i)
-		if rankName == "Gildenbank" then
-			bankRankIndex = i
-		end
-	end
-
-	Sauercrowd.MailRecipients = {}
-	for i = 1, GetNumGuildMembers() do
-		local name, rankName, rankIndex = GetGuildRosterInfo(i)
-		if name and rankIndex and bankRankIndex and rankIndex + 1 == bankRankIndex then
-			table.insert(Sauercrowd.MailRecipients, Sauercrowd:RemoveRealmFromName(name))
-		end
-	end
-	if SendMailFrame then
-		SendMailFrame:Hide()
-		if(not SendMailFrame:IsShown()) then
-			C_Timer.After(0.01666666666, function()
-				local _, rank = _G.GetGuildInfo("player");
-				if rank ~= "Gildenbank" then
-					SendMailFrame:Show()
-					InboxFrame:Hide()
-					MailFrameTab1:Hide()
-					MailFrameTab2:Hide()
-				end
-			end)
-		else
-			closeMailFrame()
-		end
-	else
-	closeMailFrame()
-	end
-end
-
-function closeMailFrame()
-	if MailFrame and MailFrame:IsShown() then
-		MailFrame:Hide()
-	end
-	Sauercrowd.Popup:Show({
-		title = "Briefkasten gesperrt!",
-		message = "Die Nutzung des Briefkastens ist während des Events nicht erlaubt.",
-		displayTime = 3
-	})
-end
-
 function Sauercrowd.Rules:Initialize()
-	Sauercrowd.EventManager:RegisterHandler("MAIL_SHOW",
-		function()
-			Sauercrowd.Rules.ProhibitMailboxUsage()
-		end, 0, "MailboxBlock")
 
 	-- Hook AuctionFrame directly to catch cases where event doesn't fire due to Blizzard errors
 	Sauercrowd.EventManager:RegisterHandler("AUCTION_HOUSE_SHOW",
