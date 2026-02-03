@@ -1,6 +1,40 @@
 Sauercrowd.Rules = {}
 Sauercrowd.MailRecipients = {}
 
+-- Check for active mailbox addons
+local function MailboxAddonActive()
+    local mailboxAddons = {
+        "TradeSkillMaster",
+        "Postal"
+    }
+
+    local detectedAddons = {}
+    for _, addonName in ipairs(mailboxAddons) do
+        if IsAddOnLoaded(addonName) then
+            table.insert(detectedAddons, addonName)
+        end
+    end
+
+    return detectedAddons
+end
+
+-- Rule: Completely prohibit mailbox usage
+function Sauercrowd.Rules:ProhibitMailboxUsage(detectedAddons)
+    CloseMail()
+
+    local message = "Briefkasten Addons erkannt!\n\nDie Nutzung wird blockiert."
+
+    if detectedAddons and #detectedAddons > 0 then
+        message = message .. "\n\n\nErkannte Briefkasten-Addons:\n• " .. table.concat(detectedAddons, "\n• ")
+    end
+
+    Sauercrowd.Popup:Show({
+        title = "Briefkasten gesperrt!",
+        message = message,
+		FrameHeight = 250
+    })
+end
+
 function Sauercrowd.Rules.ProhibitAuctionhouseUsage()
 	-- Attempt to use CloseAuctionHouse as a fallback
     if CloseAuctionHouse then
@@ -81,6 +115,14 @@ function Sauercrowd.Rules:ProhibitGroupingWithNonGuildMembers()
 end
 
 function Sauercrowd.Rules:Initialize()
+
+	Sauercrowd.EventManager:RegisterHandler("MAIL_SHOW", 
+		function()
+			local detectedAddons = MailboxAddonActive()
+			if #detectedAddons > 0 then
+				Sauercrowd.Rules:ProhibitMailboxUsage(detectedAddons)
+			end
+		end, 0, "MailboxBlock")
 
 	-- Hook AuctionFrame directly to catch cases where event doesn't fire due to Blizzard errors
 	Sauercrowd.EventManager:RegisterHandler("AUCTION_HOUSE_SHOW",

@@ -29,7 +29,7 @@ function Sauercrowd.Popup:Show(options)
 
 	-- Create the frame
 	local frame = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
-	frame:SetSize(350, 140)
+	frame:SetSize(350, options.FrameHeight or 140)
 	frame:SetPoint("TOP", UIParent, "TOP", 0, -150)
 	frame:SetBackdrop(Sauercrowd.Constants.BACKDROP)
 	frame:SetBackdropColor(0, 0, 0, 1)

@@ -143,11 +143,6 @@ local function UniversalScan()
         -- Check known mail addon buttons
         local mailButtons = {
             "OpenAllMail",              -- Common addon button
-            "PostalOpenAllButton",      -- Postal: Open All
-            "PostalSelectOpenButton",   -- Postal: Open Selected (main bypass method)
-            "PostalSelectReturnButton", -- Postal: Return Selected
-            "Postal_OpenAllMenuButton", -- Postal: Menu
-            "Postal_ModuleMenuButton",  -- Postal: Module menu
             "AutoLootMailButton"
         }
 
@@ -175,20 +170,33 @@ local function UniversalScan()
                 end
             end
         end
-
-        -- Disable Postal checkboxes to prevent selecting mail
-        for i = 1, 7 do -- 7 visible mail items per page
-            local cb = _G["PostalInboxCB"..i]
-            if cb then
-                cb:Hide()
-                cb:Disable()
-            end
-        end
     end
 end
 
+-- Delayed Scan
+local function DelayedScan()
+    C_Timer.After(0.05, UniversalScan)
+end
+
+-- Event-Handler
 frame:SetScript("OnEvent", function(_, event)
     if event == "MAIL_INBOX_UPDATE" then
-        UniversalScan()
+        DelayedScan()
     end
 end)
+
+-- Hook auf das MailFrame
+MailFrame:HookScript("OnShow", DelayedScan)
+
+-- Delayed Scan auf die Buttons setzen
+if InboxNextPageButton then
+    InboxNextPageButton:HookScript("OnClick", DelayedScan)
+end
+if InboxPrevPageButton then
+    InboxPrevPageButton:HookScript("OnClick", DelayedScan)
+end
+
+-- Falls irgendein Addon noch was macht
+if MailFrameTab1 then
+    MailFrameTab1:HookScript("OnClick", DelayedScan)
+end
