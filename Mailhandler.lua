@@ -4,8 +4,8 @@ frame:RegisterEvent("MAIL_INBOX_UPDATE")
 -- Checkt, ob der Absender "sicher" ist (man selbst, Gildenkollege oder Blizzard)
 local function IsSafeSender(index)
     -- Wir holen uns die wichtigen Daten direkt über den Index
-    -- 3: sender, 11: isGM
-    local _, _, sender, _, _, _, _, _, _, _, isGM = GetInboxHeaderInfo(index)
+    -- 3: sender, 13: isGM
+    local _, _, sender, _, _, _, _, _, _, _, _, _, isGM = GetInboxHeaderInfo(index)
 
     -- 1. Blizzard/System Check (isGM ist true bei offizieller Post)
     if isGM then return true end
