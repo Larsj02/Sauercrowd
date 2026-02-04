@@ -50,12 +50,12 @@ StaticPopupDialogs["CONFIRM_DELETE_NON_GUILD_MAIL"] = {
                     mailButton:Click()
 
                     -- Kurz warten, bis das Fenster offen ist, dann Blizzards Lösch-Button triggern
-                    C_Timer.After(0.3, function()
+                    C_Timer.After(0.1, function()
                         if OpenMailFrame:IsVisible() then
                             OpenMailDeleteButton:Click()
 
                             -- Falls Blizzard nochmal nachfragt (bei Items/Geld), bestätigen wir das auch automatisch
-                            C_Timer.After(0.2, function()
+                            C_Timer.After(0.1, function()
                                 for j = 1, 4 do
                                     local f = _G["StaticPopup"..j]
                                     if f and f:IsVisible() and (f.which == "DELETE_MAIL" or f.which == "CONFIRM_DELETE_ITEM") then
