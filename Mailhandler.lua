@@ -188,13 +188,10 @@ end)
 -- Hook auf das MailFrame
 MailFrame:HookScript("OnShow", DelayedScan)
 
--- Delayed Scan auf die Buttons setzen
-if InboxNextPageButton then
-    InboxNextPageButton:HookScript("OnClick", DelayedScan)
-end
-if InboxPrevPageButton then
-    InboxPrevPageButton:HookScript("OnClick", DelayedScan)
-end
+-- Diese Funktion wird von Blizzard jedes Mal aufgerufen, wenn die Inbox sich optisch aktualisiert
+hooksecurefunc("InboxFrame_Update", function()
+    DelayedScan()
+end)
 
 -- Falls irgendein Addon noch was macht
 if MailFrameTab1 then
