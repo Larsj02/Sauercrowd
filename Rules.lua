@@ -118,6 +118,14 @@ function Sauercrowd.Rules:Initialize()
 
 	Sauercrowd.EventManager:RegisterHandler("MAIL_SHOW", 
 		function()
+			-- Gildeninfo abrufen
+			local _, _, rankIndex = GetGuildInfo("player")
+			
+			-- Gildenbank darf Addons nutzen
+			if rankIndex == 2 then 
+				return 
+			end
+				
 			local detectedAddons = MailboxAddonActive()
 			if #detectedAddons > 0 then
 				Sauercrowd.Rules:ProhibitMailboxUsage(detectedAddons)

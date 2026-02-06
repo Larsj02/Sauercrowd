@@ -4,8 +4,8 @@ frame:RegisterEvent("MAIL_INBOX_UPDATE")
 -- Checkt, ob der Absender "sicher" ist (man selbst, Gildenkollege oder Blizzard)
 local function IsSafeSender(index)
     -- Wir holen uns die wichtigen Daten direkt über den Index
-    -- 3: sender, 13: isGM
-    local _, _, sender, _, _, _, _, _, _, _, _, _, isGM = GetInboxHeaderInfo(index)
+    -- 3: sender, 9: wasRead 13: isGM
+    local _, _, sender, _, _, _, _, _, wasRead, _, _, _, isGM = GetInboxHeaderInfo(index)
 
     -- 1. Blizzard/System Check (isGM ist true bei offizieller Post)
     if isGM then return true end
@@ -15,8 +15,11 @@ local function IsSafeSender(index)
 
     -- 3. Eigen-Check
     if sender == UnitName("player") then return true end
+	
+	-- 4. Eine bereits gelesene Mail
+	if wasRead then return true end
 
-    -- 4. Gilden-Check
+    -- 5. Gilden-Check
     local numGuild = GetNumGuildMembers()
     for i = 1, numGuild do
         local fullName = GetGuildRosterInfo(i)
@@ -39,7 +42,9 @@ StaticPopupDialogs["CONFIRM_DELETE_NON_GUILD_MAIL"] = {
             if not data.itemCount or data.itemCount == 0 then
                 DeleteInboxItem(data.slot)
             else
-                local mailButton = _G["MailItem"..data.slot.."Button"]
+				local itemsPerPage = INBOXITEMS_TO_DISPLAY or 7
+                local buttonIndex = ((data.slot - 1) % itemsPerPage) + 1
+                local mailButton = _G["MailItem"..buttonIndex.."Button"]
                 if mailButton then
                     -- Hide the guard temporarily to allow the original click handler to work
                     if mailButton.mailGuard then
@@ -103,38 +108,55 @@ end
 local function UniversalScan()
     if not MailFrame:IsVisible() then return end
 
-    local numItems, _ = GetInboxNumItems()
-    for i = 1, numItems do
-        local item = _G["MailItem"..i]
-        local senderText = _G["MailItem"..i.."Sender"]
-        local button = _G["MailItem"..i.."Button"]
+    -- Wie viele Items sind insgesamt da?
+    local numItems = GetInboxNumItems()
+    
+    -- Wie viele Items werden pro Seite angezeigt? (Standard ist 7)
+    local itemsPerPage = INBOXITEMS_TO_DISPLAY
 
-        if item and button then
-            local _, _, _, _, _, _, _, itemCount = GetInboxHeaderInfo(i)
-            if not IsSafeSender(i) then
-                -- Fremder Absender: Name wird rot
-                senderText:SetTextColor(1, 0, 0)
+    -- Aktuelle Seite berechnen (Blizzard speichert das in InboxFrame.pageNum)
+    local currentPage = InboxFrame.pageNum or 1
 
-                -- Create guard overlay if it doesn't exist
-                if not button.mailGuard then
-                    button.mailGuard = CreateFrame("Button", nil, button)
-                    button.mailGuard:SetAllPoints()
-                    button.mailGuard:SetFrameLevel(button:GetFrameLevel() + 10)
-                    button.mailGuard:EnableMouse(true)
+    -- Wir loopen NUR über die 7 sichtbaren Buttons
+    for i = 1, itemsPerPage do
+        local mailIndex = ((currentPage - 1) * itemsPerPage) + i
+        
+        -- Nur fortfahren, wenn der berechnete Index nicht über der Gesamtzahl liegt
+        if mailIndex <= numItems then
+            local item = _G["MailItem"..i]
+            local senderText = _G["MailItem"..i.."Sender"]
+            local button = _G["MailItem"..i.."Button"]
+
+            if item and button then
+                local _, _, _, subject, _, _, _, itemCount = GetInboxHeaderInfo(mailIndex)
+                
+                if not IsSafeSender(mailIndex) then
+                    -- Fremder Absender: Name wird rot
+                    if senderText then senderText:SetTextColor(1, 0, 0) end
+
+                    if not button.mailGuard then
+                        button.mailGuard = CreateFrame("Button", nil, button)
+                        button.mailGuard:SetAllPoints()
+                        button.mailGuard:SetFrameLevel(button:GetFrameLevel() + 10)
+                        button.mailGuard:EnableMouse(true)
+                    end
+
+                    button.mailGuard:SetScript("OnClick", function()
+                        local d = StaticPopup_Show("CONFIRM_DELETE_NON_GUILD_MAIL")
+                        if d then d.data = {slot = mailIndex, itemCount = itemCount} end
+                    end)
+                    button.mailGuard:Show()
+                else
+                    -- Sicherer Absender
+                    if senderText then senderText:SetTextColor(1, 0.8, 0) end
+                    if button.mailGuard then button.mailGuard:Hide() end
                 end
-
-                -- Set up the guard's click handler
-                button.mailGuard:SetScript("OnClick", function()
-                    local id = i
-                    local d = StaticPopup_Show("CONFIRM_DELETE_NON_GUILD_MAIL")
-                    if d then d.data = {slot = id, itemCount = itemCount} end
-                end)
-                button.mailGuard:Show()
-            else
-                -- Gildenkollege: Alles okay, Button freigeben
-                if senderText then senderText:SetTextColor(1, 0.8, 0) end
-                if button.mailGuard then button.mailGuard:Hide() end
             end
+        else
+            -- Falls weniger als 7 Briefe auf der aktuellen Seite sind (z.B. letzte Seite)
+            -- müssen wir die Guards der leeren Zeilen verstecken
+            local button = _G["MailItem"..i.."Button"]
+            if button and button.mailGuard then button.mailGuard:Hide() end
         end
     end
 
@@ -197,3 +219,13 @@ end)
 if MailFrameTab1 then
     MailFrameTab1:HookScript("OnClick", DelayedScan)
 end
+
+local errorListener = CreateFrame("Frame")
+errorListener:RegisterEvent("UI_ERROR_MESSAGE")
+errorListener:SetScript("OnEvent", function(_, _, messageType, msg)
+    if msg == ERR_MAIL_TARGET_NOT_FOUND then
+        if UIErrorsFrame then UIErrorsFrame:Clear() end
+        
+        Sauercrowd:Print("Diese Mail kann nicht gelöscht werden, da sie bereits geöffnet war und der Charakter mittlerweile gelöscht wurde! Ein Bezug zur Gilde ist nicht mehr nachvollziehbar")
+    end
+end)
