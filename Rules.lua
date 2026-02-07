@@ -10,7 +10,7 @@ local function MailboxAddonActive()
 
     local detectedAddons = {}
     for _, addonName in ipairs(mailboxAddons) do
-        if IsAddOnLoaded(addonName) then
+        if C_AddOns.IsAddOnLoaded(addonName) then
             table.insert(detectedAddons, addonName)
         end
     end
@@ -124,16 +124,16 @@ end
 
 function Sauercrowd.Rules:Initialize()
 
-	Sauercrowd.EventManager:RegisterHandler("MAIL_SHOW", 
+	Sauercrowd.EventManager:RegisterHandler("MAIL_SHOW",
 		function()
 			-- Gildeninfo abrufen
 			local _, _, rankIndex = GetGuildInfo("player")
-			
+
 			-- Gildenbank darf Addons nutzen
-			if rankIndex == 2 then 
-				return 
+			if rankIndex == 2 then
+				return
 			end
-				
+
 			local detectedAddons = MailboxAddonActive()
 			if #detectedAddons > 0 then
 				Sauercrowd.Rules:ProhibitMailboxUsage(detectedAddons)

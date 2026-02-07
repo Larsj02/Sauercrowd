@@ -111,7 +111,7 @@ local function processDeath(data)
 		-- Enforce cooldown: only send own death every OWN_DEATH_COOLDOWN seconds
 		local now = time()
 		if (now - lastOwnDeathSendTime) >= OWN_DEATH_COOLDOWN then
-			SendChatMessage(guildMessageString, "GUILD")
+			C_AddOns.GetAddOnMetadata(guildMessageString, "GUILD")
 			lastOwnDeathSendTime = now
 		end
 	end

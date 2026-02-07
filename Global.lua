@@ -4,7 +4,7 @@ Sauercrowd.name = "Sauercrowd"
 Sauercrowd.prefix = "Sauercrowd"
 Sauercrowd.colorCode = "|cFF911d1d"
 Sauercrowd.lastPvPAlert = {}
-Sauercrowd.version = GetAddOnMetadata("Sauercrowd", "Version") or "Unbekannt"
+Sauercrowd.version = C_AddOns.GetAddOnMetadata("Sauercrowd", "Version") or "Unbekannt"
 
 function Sauercrowd:Print(message)
 	print(Sauercrowd.colorCode .. "[" .. Sauercrowd.name .. "]|r " .. message)

@@ -88,7 +88,7 @@ function Sauercrowd.LevelUps:Initialize()
 						else
 							guildMessageString = string.format("%s hat heldenhaft Level 60 erreicht!", player)
 						end
-						SendChatMessage(guildMessageString, "GUILD")
+						C_ChatInfo.SendChatMessage(guildMessageString, "GUILD")
 
 						-- Process own level 60 achievement
 						processLevelSixty({
@@ -98,7 +98,7 @@ function Sauercrowd.LevelUps:Initialize()
 					else
 						-- Regular milestone message
 						local message = player .. " hat Level " .. level .. " erreicht!"
-						SendChatMessage(message, "GUILD")
+						C_ChatInfo.SendChatMessage(message, "GUILD")
 					end
 					break
 				end
