@@ -1,7 +1,5 @@
 # 1.1.1
 
-## Bugfixes
-
 ### Mail Protection Verbesserungen
 - **Postal Addon Bypass geschlossen**: Behebt kritische Sicherheitslücke wo Postal Addon die Mail-Protection umgehen konnte
   - `PostalSelectOpenButton` wird nun blockiert (Hauptumgehungsmethode)
@@ -27,6 +25,14 @@
 - Mail-Protection nun resistent gegen Checkbox-basierte Umgehungen
 
 ---
+## Neue Features
+
+### Duelle automatisch blockieren
+- In den Optionen des Addons gibt es nun eine Checkbox für das automatische ablehnen von duellen
+
+## Bugfixes
+### Death Message Parsing
+- **Doppelte Todesmeldungen**: Es wurde ein Cooldown für das Senden von Todesmeldungen eingebaut um doppelte Popups und Einträge im Deathlog zu vermeiden
 
 # 1.1.0
 
