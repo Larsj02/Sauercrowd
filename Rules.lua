@@ -1,7 +1,8 @@
 Sauercrowd.Rules = {}
 Sauercrowd.MailRecipients = {}
 
--- Check for active mailbox addons
+---Check for active mailbox addons
+---@return string[] detectedAddons
 local function MailboxAddonActive()
     local mailboxAddons = {
         "TradeSkillMaster",
@@ -18,7 +19,8 @@ local function MailboxAddonActive()
     return detectedAddons
 end
 
--- Rule: Completely prohibit mailbox usage
+---Rule: Completely prohibit mailbox usage
+---@param detectedAddons string[]
 function Sauercrowd.Rules:ProhibitMailboxUsage(detectedAddons)
     CloseMail()
 
@@ -31,7 +33,7 @@ function Sauercrowd.Rules:ProhibitMailboxUsage(detectedAddons)
     Sauercrowd.Popup:Show({
         title = "Briefkasten gesperrt!",
         message = message,
-		FrameHeight = 250
+				FrameHeight = 250
     })
 end
 
@@ -45,11 +47,11 @@ function Sauercrowd.Rules.ProhibitAuctionhouseUsage()
         AuctionFrame:Hide() -- Directly hide the frame
     end
 
-	Sauercrowd.Popup:Show({
-		title = "Auktionshaus gesperrt!",
-		message = "Die Nutzung des Auktionshauses ist während des Events nicht erlaubt.",
-		displayTime = 3
-	})
+		Sauercrowd.Popup:Show({
+			title = "Auktionshaus gesperrt!",
+			message = "Die Nutzung des Auktionshauses ist während des Events nicht erlaubt.",
+			displayTime = 3
+		})
 end
 
 function Sauercrowd.Rules:AutoDeclineDuels()
@@ -77,26 +79,10 @@ function Sauercrowd.Rules:ProhibitTradeWithNonGuildMembers()
 end
 
 function Sauercrowd.Rules:ProhibitGroupingWithNonGuildMembers()
-	-- Request fresh guild roster data
-	C_GuildInfo.GuildRoster()
-
-	-- Build list of all guild members
-	local guildMembers = {}
-	local numTotalGuildMembers = GetNumGuildMembers()
-	for i = 1, numTotalGuildMembers do
-		local name = GetGuildRosterInfo(i)
-		if name then
-			table.insert(guildMembers, Sauercrowd:RemoveRealmFromName(name))
-		end
-	end
-
 	-- Check all group members
-	local numGroupMembers = GetNumGroupMembers()
-	for i = 1, numGroupMembers do
-		local unit = "party" .. i
-		if not UnitExists(unit) then
-			unit = "raid" .. i
-		end
+	local unitPrefix = IsInRaid() and "raid" or "party"
+	for i = 1, GetNumGroupMembers() do
+		local unit = unitPrefix .. i
 
 		-- Skip disconnected players - they'll be checked again when they reconnect
 		if UnitExists(unit) and not UnitIsConnected(unit) then
@@ -105,8 +91,7 @@ function Sauercrowd.Rules:ProhibitGroupingWithNonGuildMembers()
 			local memberName = UnitName(unit)
 			-- Skip if name is not yet available (loading state)
 			if memberName and memberName ~= UNKNOWNOBJECT and memberName ~= "" then
-				local shortMemberName = Sauercrowd:RemoveRealmFromName(memberName)
-				local isInGuild = tContains(guildMembers, shortMemberName)
+				local isInGuild = Sauercrowd.GuildCache:IsGuildMember(memberName)
 
 				if not isInGuild then
 					LeaveParty()
@@ -127,7 +112,7 @@ function Sauercrowd.Rules:Initialize()
 	Sauercrowd.EventManager:RegisterHandler("MAIL_SHOW",
 		function()
 			-- Gildeninfo abrufen
-			local _, _, rankIndex = GetGuildInfo("player")
+			local rankIndex = Sauercrowd.GuildCache:GetMemberInfo("player").rankIndex
 
 			-- Gildenbank darf Addons nutzen
 			if rankIndex == 2 then
@@ -153,7 +138,9 @@ function Sauercrowd.Rules:Initialize()
 
 	-- Instantly decline party invites from non-guild members
 	Sauercrowd.EventManager:RegisterHandler("PARTY_INVITE_REQUEST",
-		function(event, sender)
+		---@param _ WowEvent
+		---@param sender string
+		function(_, sender)
 			local isInGuild = Sauercrowd.GuildCache:IsGuildMember(sender)
 			if not isInGuild then
 				StaticPopup_Hide("PARTY_INVITE")
