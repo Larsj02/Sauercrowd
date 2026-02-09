@@ -57,6 +57,17 @@
 ---@field name string
 ---@field twitchHandle string|nil
 
+---@class SC_PopupOptions
+---@field title string title text (required)
+---@field message string message text (required)
+---@field titleColor {r: number, g: number, b: number}|nil table (optional, defaults to red)
+---@field messageColor {r: number, g: number, b: number}|nil table (optional, defaults to gold)
+---@field borderColor {r: number, g: number, b: number, a: number}|nil table (optional, defaults to red)
+---@field displayTime number|nil seconds to show popup (optional, defaults to 3)
+---@field playSound number|nil sound ID to play (optional)
+---@field rumble boolean|nil whether to rumble the frame (optional, defaults to true)
+---@field FrameHeight number|nil height of the popup frame (optional, defaults to 140)
+
 ---@alias StatusEnum
 ---| 0 None
 ---| 1 AFK

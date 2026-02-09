@@ -1,0 +1,23 @@
+{
+  "Lua.diagnostics.globals": [
+    "NUM_CHAT_WINDOWS",
+    "StaticPopupDialogs",
+    "MailFrame",
+    "MailFrameTab1",
+    "INBOXITEMS_TO_DISPLAY",
+    "InboxFrame",
+    "ERR_MAIL_TARGET_NOT_FOUND",
+    "UIErrorsFrame",
+    "OPEN_ALL_MAIL_BUTTON",
+    "StaticPopup_Show",
+    "OpenMailFrame",
+    "OpenMailDeleteButton",
+    "MiniMapMailIcon",
+    "Settings",
+    "StaticPopup_Hide",
+    "UNKNOWNOBJECT",
+    "LOCALIZED_CLASS_NAMES_MALE",
+    "LOCALIZED_CLASS_NAMES_FEMALE",
+    "RAID_CLASS_COLORS"
+  ]
+}
